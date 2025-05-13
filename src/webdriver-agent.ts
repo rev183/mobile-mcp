@@ -1,4 +1,4 @@
-import { ActionableError, SwipeDirection, ScreenSize, ScreenElement } from "./robot";
+import { ActionableError, SwipeDirection, ScreenSize, ScreenElement } from "./robot.js";
 
 export interface SourceTreeElementRect {
 	x: number;

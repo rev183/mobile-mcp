@@ -2,23 +2,26 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types";
 import { z, ZodRawShape, ZodTypeAny } from "zod";
 import sharp from "sharp";
+import { v4 as uuidv4 } from 'uuid';
 
-import { error, trace } from "./logger";
-import { AndroidRobot, getConnectedDevices } from "./android";
-import { ActionableError, Robot } from "./robot";
-import { SimctlManager } from "./iphone-simulator";
-import { IosManager, IosRobot } from "./ios";
+import { error, trace } from "./logger.js";
+import { AndroidRobot, getConnectedDevices } from "./android.js";
+import { ActionableError, Robot } from "./robot.js";
+import { SimctlManager } from "./iphone-simulator.js";
+import { IosManager, IosRobot } from "./ios.js";
+import { exec } from "node:child_process";
+import { AppetizeManager } from "./iphone-appetize.js";
 
-const getAgentVersion = (): string => {
-	const json = require("../package.json");
-	return json.version;
-};
+// const getAgentVersion = (): string => {
+// 	const version = process.env.VERSION as string;
+// 	return version;
+// };
 
 export const createMcpServer = (): McpServer => {
 
 	const server = new McpServer({
 		name: "mobile-mcp",
-		version: getAgentVersion(),
+		version: '0.1',
 		capabilities: {
 			resources: {},
 			tools: {},
@@ -55,10 +58,17 @@ export const createMcpServer = (): McpServer => {
 
 	let robot: Robot | null;
 	const simulatorManager = new SimctlManager();
+	let appetizeManager: AppetizeManager | null;
 
 	const requireRobot = () => {
 		if (!robot) {
 			throw new ActionableError("No device selected. Use the mobile_use_device tool to select a device.");
+		}
+	};
+
+	const requireAppetizeManager = () => {
+		if (!appetizeManager) {
+			throw new ActionableError("No Appetize simulator selected. Use the create_appetize_simulator tool to create a simulator.");
 		}
 	};
 
@@ -76,12 +86,77 @@ export const createMcpServer = (): McpServer => {
 		}
 	);
 
+	server.tool(
+        "create_appetize_simulator",
+        "When no devices are available, create a new Appetize simulator and use it. This will open a URL in Chrome with a clientId parameter. The clientId is a UUID that is used to identify the simulator.",
+        {},
+        async ({}) => {
+            try {
+                // Step 1: Generate a unique clientId (UUID)
+                const clientId = uuidv4();
+                // console.log("Generated clientId:", clientId);
+
+                // Step 2: Create the URL with the clientId
+                const url = `http://localhost:8080/launch.html?clientId=${clientId}`;
+                // console.log("Opening URL:", url);
+
+                // Step 3: Open the URL in Chrome (using child_process to run system command)
+                let command: string;
+
+                if (process.platform === 'win32') {
+                    // Windows command to open Chrome
+                    command = `start chrome "${url}"`;
+                } else if (process.platform === 'darwin') {
+                    // macOS command to open Chrome
+                    command = `open -a "Google Chrome" "${url}"`;
+                } else {
+                    // Linux command to open Chrome
+                    command = `google-chrome "${url}"`; // Replace 'google-chrome' with 'chromium' if necessary
+                }
+
+                exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        // console.error(`exec error: ${error}`);
+                        return {
+                            content: [{ type: "text", text: `Error: ${error.message}` }],
+                            isError: true,
+                        };
+                    }
+
+                    if (stderr) {
+                        // console.error(`stderr: ${stderr}`);
+                    }
+
+                    // console.log(`stdout: ${stdout}`);
+                    return {
+                        content: [{ type: "text", text: `Successfully opened URL with clientId: ${clientId}` }],
+                    };
+                });
+
+                // Step 4: Use the clientId to instantiate AppetizeManager (example logic)
+                appetizeManager = new AppetizeManager(clientId);
+                const simulator = appetizeManager.createAppetizeSimulator();
+                // console.log("Appetize Simulator created:", simulator);
+
+                return {
+                    content: [{ type: "text", text: `Launched URL with clientId ${clientId} and simulator created.` }],
+                };
+            } catch (error: any) {
+                // console.error("Error in open_url_in_chrome_with_client_id:", error);
+                return {
+                    content: [{ type: "text", text: `Error: ${error.message}` }],
+                    isError: true,
+                };
+            }
+        }
+    );
+
 	tool(
 		"mobile_use_device",
 		"Select a device to use. This can be a simulator or an Android device. Use the list_available_devices tool to get a list of available devices.",
 		{
 			device: z.string().describe("The name of the device to select"),
-			deviceType: z.enum(["simulator", "ios", "android"]).describe("The type of device to select"),
+			deviceType: z.enum(["simulator", "ios", "android", "appetize-ios"]).describe("The type of device to select"),
 		},
 		async ({ device, deviceType }) => {
 			switch (deviceType) {
@@ -94,6 +169,10 @@ export const createMcpServer = (): McpServer => {
 				case "android":
 					robot = new AndroidRobot(device);
 					break;
+				case "appetize-ios":
+					requireAppetizeManager();
+					robot = appetizeManager!.createAppetizeSimulator();
+					break
 			}
 
 			return `Selected device: ${device} (${deviceType})`;
@@ -276,9 +355,9 @@ export const createMcpServer = (): McpServer => {
 					content: [{ type: "image", data: screenshot64, mimeType: "image/jpeg" }]
 				};
 			} catch (err: any) {
-				error(`Error taking screenshot: ${err.message} ${err.stack}`);
+				error(`Error taking screenshot: ${err}`);
 				return {
-					content: [{ type: "text", text: `Error: ${err.message}` }],
+					content: [{ type: "text", text: `Error: ${err}` }],
 					isError: true,
 				};
 			}

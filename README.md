@@ -209,3 +209,10 @@ The commands and tools support both accessibility-based locators (preferred) and
    <img src = "https://contrib.rocks/image?repo=mobile-next/mobile-mcp"/>
  </a>
 
+
+# iOS similator steps
+ - cd ~/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj
+
+ # Appetize
+Server main file
+ /Users/revanth/Drizz/mobile-mcp/lib/index.js

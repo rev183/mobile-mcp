@@ -1,14 +1,15 @@
 {
-  "name": "@mobilenext/mobile-mcp",
+  "name": "@rev183/mobile-mcp",
   "version": "0.0.12",
   "description": "Mobile MCP",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mobile-next/mobile-mcp.git"
+    "url": "git+https://github.com/rev183/mobile-mcp.git"
   },
   "engines": {
     "node": ">=18"
   },
+  "type": "module",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && chmod +x lib/index.js",
@@ -19,14 +20,19 @@
     "prepare": "husky"
   },
   "files": [
-    "lib"
+    "lib",
+    "src/appetize"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
+    "express": "^5.1.0",
     "fast-xml-parser": "^5.0.9",
     "nyc": "^17.1.0",
     "sharp": "^0.33.5",
-    "zod-to-json-schema": "^3.24.4"
+    "typescript": "^5.8.2",
+    "websocket": "^1.0.35",
+    "zod-to-json-schema": "^3.24.4",
+    "axios": "^1.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -34,6 +40,7 @@
     "@stylistic/eslint-plugin": "^3.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.13.10",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.26.1",
     "@typescript-eslint/utils": "^8.26.1",
@@ -44,7 +51,8 @@
     "husky": "^9.1.7",
     "mocha": "^11.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "@types/websocket": "^1.0.0",
+    "@types/express": "^4.17.13"
   },
   "main": "index.js",
   "bin": {
@@ -55,7 +63,7 @@
   },
   "author": "",
   "bugs": {
-    "url": "https://github.com/mobile-next/mobile-mcp/issues"
+    "url": "https://github.com/rev183/mobile-mcp/issues"
   },
-  "homepage": "https://github.com/mobile-next/mobile-mcp#readme"
+  "homepage": "https://github.com/rev183/mobile-mcp#readme"
 }

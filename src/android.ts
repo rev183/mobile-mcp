@@ -3,7 +3,7 @@ import { execFileSync } from "child_process";
 
 import * as xml from "fast-xml-parser";
 
-import { ActionableError, Button, InstalledApp, Robot, ScreenElement, ScreenElementRect, ScreenSize, SwipeDirection } from "./robot";
+import { ActionableError, Button, InstalledApp, Robot, ScreenElement, ScreenElementRect, ScreenSize, SwipeDirection } from "./robot.js";
 
 interface UiAutomatorXmlNode {
 	node: UiAutomatorXmlNode[];

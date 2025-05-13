@@ -1,7 +1,7 @@
 import { execFileSync } from "child_process";
 
-import { WebDriverAgent } from "./webdriver-agent";
-import { ActionableError, Button, InstalledApp, Robot, ScreenElement, ScreenSize, SwipeDirection } from "./robot";
+import { WebDriverAgent } from "./webdriver-agent.js";
+import { ActionableError, Button, InstalledApp, Robot, ScreenElement, ScreenSize, SwipeDirection } from "./robot.js";
 
 export interface Simulator {
 	name: string;

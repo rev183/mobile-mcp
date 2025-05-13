@@ -5,8 +5,8 @@ import { readFileSync, unlinkSync } from "fs";
 import { execFileSync } from "child_process";
 import { Socket } from "net";
 
-import { WebDriverAgent } from "./webdriver-agent";
-import { ActionableError, Button, InstalledApp, Robot, ScreenSize, SwipeDirection, ScreenElement } from "./robot";
+import { WebDriverAgent } from "./webdriver-agent.js";
+import { ActionableError, Button, InstalledApp, Robot, ScreenSize, SwipeDirection, ScreenElement } from "./robot.js";
 
 const WDA_PORT = 8100;
 const IOS_TUNNEL_PORT = 60105;
